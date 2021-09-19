@@ -1,189 +1,310 @@
 var canvas;
 var ctx;
-var FPS = 80;
+var FPS = 50;
 
+var anchoF = 50;
+var altoF = 50;
+
+var protagonista;
+var enemigo=[];
+var imagenAntorcha;
 var tileMap;
 
-var anchoF = 32;
-var altoF = 32;
+var musica;
+var sonido1, sonido2, sonido3;
 
-var anchoEscenario = 25;
-var altoEscenario = 20;
 
-var camara;
+musica = new Howl({
+    src: ['music/fortaleza.mp3'],
+    loop: true
+});
+
+sonido1 = new Howl({
+    src: ['sound/fuego.wav'],
+    loop: false
+});
+
+sonido2 = new Howl({
+    src: ['sound/llave.wav'],
+    loop: false
+});
+
+sonido3 = new Howl({
+    src: ['sound/puerta.wav'],
+    loop: false
+});
 
 var escenario = [
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,2,2,0,0,0,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0],
-  [0,0,2,2,2,2,2,2,0,2,0,0,2,2,0,0,0,2,0,0,2,0,0,0,0],
-  [0,0,2,0,0,2,2,2,0,2,2,2,2,2,0,0,0,0,0,0,2,2,2,0,0],
-  [0,0,2,2,2,0,2,2,0,0,2,2,2,0,0,0,2,2,2,2,2,0,2,0,0],
-  [0,2,2,0,0,0,0,2,0,0,0,2,0,0,0,0,2,0,0,2,0,0,2,0,0],
-  [0,0,2,0,0,0,2,2,2,0,0,2,2,2,0,0,2,0,0,0,0,0,2,0,0],
-  [0,2,2,2,0,0,2,0,0,2,2,2,2,2,2,2,2,0,0,2,2,0,2,0,0],
-  [0,2,2,3,0,0,2,0,0,1,2,2,2,2,0,0,0,0,2,2,2,2,2,0,0],
-  [0,2,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0],
-  [0,2,2,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0],
-  [0,2,0,2,2,2,0,0,0,0,0,2,2,2,2,0,0,0,0,0,2,2,2,0,0],
-  [0,2,0,2,2,2,0,0,0,0,0,2,0,0,2,0,0,0,0,0,2,2,2,0,0],
-  [0,2,0,0,0,2,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,2,0,0,0],
-  [0,2,0,0,0,2,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0,0],
-  [0,2,2,2,0,2,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0,0],
-  [0,2,0,2,0,0,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0,0],
-  [0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,2,2,2,2,0,0,2,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-];
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,2,2,0,0,0,2,2,2,2,0,0,2,2,0],
+    [0,0,2,2,2,2,2,0,0,2,0,0,2,0,0],
+    [0,0,2,0,0,0,2,2,0,2,2,2,2,0,0],
+    [0,0,2,2,2,0,0,2,0,0,0,2,0,0,0],
+    [0,2,2,0,0,0,0,2,0,0,0,2,0,0,0],
+    [0,0,2,0,0,0,2,2,2,0,0,2,2,2,0],
+    [0,2,2,2,0,0,2,0,0,0,1,0,0,2,0],
+    [0,2,2,3,0,0,2,0,0,2,2,2,2,2,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+]
 
-var objCamara = function(ancho,alto,tableroX,tableroY,pantallaX,pantallaY){
-    this.anchoCamara = ancho;
-    this.altoCamara = alto;
-  
-    this.posX = tableroX;
-    this.posY = tableroY;
-  
-    this.margenX = 0;
-    this.margenY = 0;
-  
-    this.pantallaX = pantallaX;
-    this.pantallaY = pantallaY;
-  
+function dibujaEscenario(){
+    for(y=0;y<10;y++){
+        for(x=0;x<15;x++){
+            var tile = escenario[y][x];
+            ctx.drawImage(tileMap,tile*32,0,32,32,anchoF*x,altoF*y,anchoF,altoF);
+        }
+    }
+}
+
+
+var antorcha = function(x,y){
+    this.x = x;
+    this.y = y;
+
+    this.retraso = 10;
+    this.contador = 0;
+    this.fotograma = 0;
+
+    this.cambiaFotograma = function(){
+        if(this.fotograma < 3) {
+            this.fotograma++;
+        } else{
+            this.fotograma = 0;
+        }
+    }
+
     this.dibuja = function(){
-        var textura;
-  
-        for(y=this.posY;y<(this.posY + this.altoCamara + 1);y++){
-            for(x=this.posX;x<(this.posX + this.anchoCamara + 1);x++){
-                textura = escenario[y][x];
-            
-                if(y!=this.posY && y!= (this.posY + this.altoCamara)  && x!= this.posX && x!= (this.posX + this.anchoCamara)){
-                    ctx.drawImage(tileMap,textura*anchoF,0,anchoF,altoF,((this.pantallaX + x - this.posX)*anchoF - this.margenX),((this.pantallaY + y - this.posY)*altoF-this.margenY),anchoF,altoF);
-                }
-        
-                if(y==this.posY && x!= this.posX && x!= (this.posX + this.anchoCamara)){
-                    ctx.drawImage(tileMap,(textura*anchoF),this.margenY,anchoF,(altoF-this.margenY),((this.pantallaX + x - this.posX)*anchoF - this.margenX),(this.pantallaY + y - this.posY)*altoF,anchoF,(altoF - this.margenY));
-                }
+        if(this.contador < this.retraso){
+            this.contador++;
+        } else {
+            this.contador = 0;
+            this.cambiaFotograma();
+        }
 
-                if(y==(this.posY + this.altoCamara) && x!= this.posX && x!= (this.posX + this.anchoCamara)){
-                    ctx.drawImage(tileMap,(textura*anchoF),0,anchoF,this.margenY,((this.pantallaX + x - this.posX)*anchoF - this.margenX),((this.pantallaY + y - this.posY)*altoF-this.margenY),anchoF,(altoF - (altoF - this.margenY)));
-                }
-        
-                if(x==this.posX && y!=this.posY && y!= (this.posY + this.altoCamara)){
-                    ctx.drawImage(tileMap,((textura*anchoF)+this.margenX),0,(anchoF-this.margenX),altoF,((this.pantallaX + x - this.posX)*anchoF),((this.pantallaY + y - this.posY)*altoF-this.margenY),(anchoF - this.margenX),altoF);
-                }
-        
-                if(x==(this.posX + this.anchoCamara) && y!=this.posY && y!= (this.posY + this.altoCamara)){
-                    ctx.drawImage(tileMap,(textura*anchoF),0,this.margenX,altoF,((this.pantallaX + x - this.posX)*anchoF - this.margenX),((this.pantallaY + y - this.posY)*altoF-this.margenY),this.margenX,altoF);
-                }
-        
-                if(x==this.posX && y== this.posY){
-                    ctx.drawImage(tileMap,((textura*anchoF)+this.margenX),this.margenY,(anchoF-this.margenX),(altoF-this.margenY),((this.pantallaX + x - this.posX)*anchoF),(this.pantallaY + y - this.posY)*altoF,(anchoF - this.margenX),(altoF - this.margenY));
-                }
-        
-                if(x==this.posX && y==(this.posY + this.altoCamara)){
-                    ctx.drawImage(tileMap,((textura*anchoF)+this.margenX),0,(anchoF-this.margenX),this.margenY,((this.pantallaX + x - this.posX)*anchoF),((this.pantallaY + y - this.posY)*altoF-this.margenY),(anchoF - this.margenX),(altoF - (altoF - this.margenY)));
-                }
-        
-                if(x==(this.posX + this.anchoCamara) && y==this.posY){
-                    ctx.drawImage(tileMap,(textura*anchoF),this.margenY,this.margenX,(altoF-this.margenY),((this.pantallaX + x - this.posX)*anchoF - this.margenX),(this.pantallaY + y - this.posY)*altoF,this.margenX,(altoF - this.margenY));
-                }
-        
-                if(x==(this.posX + this.anchoCamara) && y==(this.posY + this.altoCamara)){
-                    ctx.drawImage(tileMap,(textura*anchoF),0,this.margenX,this.margenY,((this.pantallaX + x - this.posX)*anchoF - this.margenX),((this.pantallaY + y - this.posY)*altoF-this.margenY),this.margenX,(altoF - (altoF - this.margenY)));
-                }
-            }
-        }  
+        ctx.drawImage(tileMap,this.fotograma*32,64,32,32,anchoF*x,altoF*y,anchoF,altoF);
     }
 
-    this.arriba = function(velocidad){
-        if(this.posY > -1){
-            if(this.margenY > 0){
-                this.margenY -= velocidad;
+}
+
+var malo = function(x,y){
+    this.x = x;
+    this.y = y;
+
+    this.direccion = Math.floor(Math.random()*4);
+
+    this.retraso = 50;
+    this.fotograma = 0;
+
+
+    this.dibuja = function(){
+        ctx.drawImage(tileMap,0,32,32,32,this.x*anchoF,this.y*altoF,anchoF,altoF);
+    }
+
+    this.compruebaColision = function(x,y){
+        var colisiona = false;
+
+        if(escenario[y][x]==0){
+          colisiona = true;
+        }
+        return colisiona;
+    }
+
+    this.mueve = function(){
+        protagonista.colisionEnemigo(this.x, this.y);
+
+        if(this.contador < this.retraso){
+            this.contador++;
+        } else{
+            this.contador = 0;
+         
+            if(this.direccion == 0){
+                if(this.compruebaColision(this.x, this.y - 1)==false){
+                    this.y--;
+                } else{
+                    this.direccion = Math.floor(Math.random()*4);
+                }
             }
-            else{        
-                if(this.posY >0){
-                this.margenY = altoF;
-                this.posY--;
+
+            if(this.direccion == 1){
+                if(this.compruebaColision(this.x, this.y + 1)==false){
+                    this.y++;
+                } else{
+                    this.direccion = Math.floor(Math.random()*4);
+                }
+            }
+
+            if(this.direccion == 2){
+                if(this.compruebaColision(this.x - 1, this.y)==false){
+                    this.x--;
+                } else{
+                    this.direccion = Math.floor(Math.random()*4);
+                }
+            }
+
+            if(this.direccion == 3){
+                if(this.compruebaColision(this.x + 1, this.y)==false){
+                    this.x++;
+                } else{
+                    this.direccion = Math.floor(Math.random()*4);
                 }
             }
         }
-    }    
-    
-    this.abajo = function(velocidad){    
-        if(this.posY < altoEscenario - this.altoCamara - 1){
-          if(this.margenY < altoF){
-            this.margenY += velocidad;
-          }
-          else{
-            this.margenY=0;
-            this.posY++;
-          }
+
+    }
+
+}
+
+var jugador = function(){
+    this.x = 1;
+    this.y = 1;
+
+    this.color = '#820c01';
+    this.llave = false;
+
+    this.dibuja = function(){
+        ctx.drawImage(tileMap,32,32,32,32,this.x*anchoF,this.y*altoF,anchoF,altoF);
+    }
+
+    this.colisionEnemigo = function(x,y){
+        if(this.x == x && this.y == y){
+            this.muerte();
         }
     }
-    
-    this.derecha = function(velocidad){
-        if(this.posX < anchoEscenario - this.anchoCamara - 1){
-            if(this.margenX < anchoF){
-                this.margenX += velocidad;
-            }
-            else{
-                this.margenX=0;
-                this.posX++;
+
+
+    this.margenes = function(x,y){
+        var colision = false;
+
+        if(escenario[y][x]==0){
+            colision = true;
+        }
+
+        return(colision);
+    }
+
+    this.arriba = function(){
+        if(this.margenes(this.x, this.y-1)==false){
+            this.y--;
+            this.logicaObjetos();
+        }
+    }
+
+    this.abajo = function(){
+        if(this.margenes(this.x, this.y+1)==false){
+            this.y++;
+            this.logicaObjetos();
+        }
+    }
+
+    this.izquierda = function(){
+        if(this.margenes(this.x-1, this.y)==false){
+            this.x--;
+            this.logicaObjetos();
+        }
+    }
+
+    this.derecha = function(){
+        if(this.margenes(this.x+1, this.y)==false){
+            this.x++;
+            this.logicaObjetos();
+        }
+    }
+
+    this.victoria = function(){
+        sonido3.play();
+        console.log('Has ganado!');
+
+        this.x = 1;
+        this.y = 1;
+
+        this.llave = false;
+        escenario[8][3] = 3;
+    }
+
+    this.muerte = function(){
+        sonido1.play();
+        console.log('Has perdido!');
+
+        this.x = 1;
+        this.y = 1;
+
+        this.llave = false;
+        escenario[8][3] = 3;
+    }
+
+    this.logicaObjetos = function(){
+        var objeto = escenario[this.y][this.x];
+
+        if(objeto == 3){
+            sonido2.play();
+            this.llave = true;
+            escenario[this.y][this.x]=2;
+            console.log('Has obtenido la llave!!');
+        }
+
+        if(objeto == 1){
+            if(this.llave == true){
+                this.victoria();
+            } else {
+                console.log('No tienes la llave, no puedes pasar!');
             }
         }
     }
-    
-    this.izquierda = function(velocidad){
-        if(this.posX > -1){
-            if(this.margenX > 0){
-                this.margenX -= velocidad;
-            }
-            else{        
-                if(this.posX >0){
-                this.margenX = altoF;
-                this.posX--;
-                }
-            }    
-        }
-    }
-} 
-  
+}
+
 function inicializa(){
     canvas = document.getElementById('canvas');
-    ctx = canvas.getContext('2d');  
+    ctx = canvas.getContext('2d');
 
     tileMap = new Image();
     tileMap.src = 'img/tilemap.png';
 
-    camara = new objCamara(10,10,0,0,1,1);
-    
-    document.addEventListener('keydown', function(tecla){
-        var velocidadMovimiento = 4;
+    musica.play();
 
-        if(tecla.key === 'ArrowUp'){    
-            camara.arriba(velocidadMovimiento);            
+    protagonista = new jugador();
+    imagenAntorcha = new antorcha(0,0);
+
+    enemigo.push(new malo(3,3));
+    enemigo.push(new malo(5,7));
+    enemigo.push(new malo(7,7));
+
+    document.addEventListener('keydown',function(tecla){
+        if(tecla.key === 'ArrowUp'){
+            protagonista.arriba();
         }
-        if(tecla.key === 'ArrowDown'){            
-            camara.abajo(velocidadMovimiento);            
+
+        if(tecla.key === 'ArrowDown'){
+            protagonista.abajo();
         }
-        if(tecla.key === 'ArrowLeft'){            
-            camara.izquierda(velocidadMovimiento);            
+
+        if(tecla.key === 'ArrowLeft'){
+            protagonista.izquierda();
         }
-        if(tecla.key === 'ArrowRight'){            
-            camara.derecha(velocidadMovimiento);            
+
+        if(tecla.key === 'ArrowRight'){
+            protagonista.derecha();
         }
     });
 
     setInterval(function(){
         principal();
-    }, 1000/FPS);
+    },1000/FPS);
 }
 
 function borraCanvas(){
-    canvas.width = 750;
-    canvas.height = 500;
+    canvas.width=750;
+    canvas.height=500;
 }
+
 
 function principal(){
     borraCanvas();
-    camara.dibuja();    
+    dibujaEscenario();
+    imagenAntorcha.dibuja();
+    protagonista.dibuja();
+
+    for(c=0; c<enemigo.length; c++){
+        enemigo[c].mueve();
+        enemigo[c].dibuja();
+    }
 }
