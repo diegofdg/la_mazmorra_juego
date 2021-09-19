@@ -149,7 +149,19 @@ var malo = function(x,y){
                 }
             }
         }
+    }
 
+    this.getCoordenadas = function(){
+        var coordenadas = [];
+        coordenadas.push(this.x);
+        coordenadas.push(this.y);
+
+        return coordenadas;
+    }
+
+    this.setCoordenadas = function(x,y){
+        this.x = x;
+        this.y = y;
     }
 
 }
@@ -160,6 +172,19 @@ var jugador = function(){
 
     this.color = '#820c01';
     this.llave = false;
+
+    this.getCoordenadas = function(){
+        var coordenadas = [];
+        coordenadas.push(this.x);
+        coordenadas.push(this.y);
+
+        return coordenadas;
+    }
+
+    this.setCoordenadas = function(x,y){
+        this.x = x;
+        this.y = y;
+    }
 
     this.dibuja = function(){
         ctx.drawImage(tileMap,32,32,32,32,this.x*anchoF,this.y*altoF,anchoF,altoF);
@@ -252,6 +277,76 @@ var jugador = function(){
     }
 }
 
+function guardarPartida(){
+    var coordenadasJ = [];
+    var coordenadasE0 = [];
+    var coordenadasE1 = [];
+    var coordenadasE2 = [];
+    coordenadasJ = protagonista.getCoordenadas();
+    coordenadasE0 = enemigo[0].getCoordenadas();
+    coordenadasE1 = enemigo[1].getCoordenadas();
+    coordenadasE2 = enemigo[2].getCoordenadas();
+    
+    localStorage.setItem('jx',coordenadasJ[0]);
+    localStorage.setItem('jy',coordenadasJ[1]);
+
+    localStorage.setItem('e0x',coordenadasE0[0]);
+    localStorage.setItem('e0y',coordenadasE0[1]);
+
+    localStorage.setItem('e1x',coordenadasE1[0]);
+    localStorage.setItem('e1y',coordenadasE1[1]);
+
+    localStorage.setItem('e2x',coordenadasE2[0]);
+    localStorage.setItem('e2y',coordenadasE2[1]);
+
+    console.log('Partida guardada')
+}
+
+function guardarPartida(){
+    var coordenadasJ = [];
+    var coordenadasE0 = [];
+    var coordenadasE1 = [];
+    var coordenadasE2 = [];
+    coordenadasJ = protagonista.getCoordenadas();
+    coordenadasE0 = enemigo[0].getCoordenadas();
+    coordenadasE1 = enemigo[1].getCoordenadas();
+    coordenadasE2 = enemigo[2].getCoordenadas();
+    
+    localStorage.setItem('jx',coordenadasJ[0]);
+    localStorage.setItem('jy',coordenadasJ[1]);
+
+    localStorage.setItem('e0x',coordenadasE0[0]);
+    localStorage.setItem('e0y',coordenadasE0[1]);
+
+    localStorage.setItem('e1x',coordenadasE1[0]);
+    localStorage.setItem('e1y',coordenadasE1[1]);
+
+    localStorage.setItem('e2x',coordenadasE2[0]);
+    localStorage.setItem('e2y',coordenadasE2[1]);
+
+    console.log('Partida guardada')
+}
+
+function cargarPartida(){
+    var jx,jy,e0x,e0y,e1x,e1y,e2x,e2y;
+    jx = localStorage.getItem('jx');
+    jy = localStorage.getItem('jy');
+
+    e0x = localStorage.getItem('e0x');
+    e0y = localStorage.getItem('e0y');
+
+    e1x = localStorage.getItem('e1x');
+    e1y = localStorage.getItem('e1y');
+
+    e2x = localStorage.getItem('e2x');
+    e2y = localStorage.getItem('e2y');
+
+    protagonista.setCoordenadas(jx,jy);
+    enemigo[0].setCoordenadas(e0x,e0y);
+    enemigo[1].setCoordenadas(e1x,e1y);
+    enemigo[2].setCoordenadas(e2x,e2y);
+}
+
 function inicializa(){
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
@@ -264,11 +359,11 @@ function inicializa(){
     protagonista = new jugador();
     imagenAntorcha = new antorcha(0,0);
 
-    enemigo.push(new malo(3,3));
-    enemigo.push(new malo(5,7));
-    enemigo.push(new malo(7,7));
+    enemigo.push(new malo(4,4));
+    enemigo.push(new malo(10,1));
+    enemigo.push(new malo(14,1));
 
-    document.addEventListener('keydown',function(tecla){
+    document.addEventListener('keydown',function(tecla){        
         if(tecla.key === 'ArrowUp'){
             protagonista.arriba();
         }
@@ -284,6 +379,19 @@ function inicializa(){
         if(tecla.key === 'ArrowRight'){
             protagonista.derecha();
         }
+
+        if(tecla.key === 'g'){
+            guardarPartida();
+        }
+
+        if(tecla.key === 'c'){
+            cargarPartida();
+        }
+
+        if(tecla.key === 'b'){
+            //borrar
+        }
+        
     });
 
     setInterval(function(){
