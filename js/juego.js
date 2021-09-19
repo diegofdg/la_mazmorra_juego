@@ -8,32 +8,93 @@ var tileMap;
 var anchoF = 50;
 var altoF = 50;
 
+var anchoEscenario = 25;
+var altoEscenario = 10;
+
 var muro = '#044f14';
 var puerta = '#3a1700';
 var tierra = '#c6892f';
 var llave = '#c6bc00';
 
+var camara;
+var camara2;
+
 var escenario = [
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,2,2,0,0,0,2,2,2,2,0,0,2,2,0],
-    [0,0,2,2,2,2,2,0,0,2,0,0,2,0,0],
-    [0,0,2,0,0,0,2,2,0,2,2,2,2,0,0],
-    [0,0,2,2,2,0,0,2,0,0,0,2,0,0,0],
-    [0,2,2,0,0,0,0,2,0,0,0,2,0,0,0],
-    [0,0,2,0,0,0,2,2,2,0,0,2,2,2,0],
-    [0,2,2,2,0,0,2,0,0,0,1,0,0,2,0],
-    [0,2,2,3,0,0,2,0,0,2,2,2,2,2,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-];  
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,2,2,0,0,0,2,2,2,2,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0],
+  [0,0,2,2,2,2,2,2,0,2,0,0,2,2,0,0,0,2,0,0,2,0,0,0,0],
+  [0,0,2,0,0,2,2,2,0,2,2,2,2,2,0,0,0,0,0,0,2,2,2,0,0],
+  [0,0,2,2,2,0,2,2,0,0,2,2,2,0,0,0,2,2,2,2,2,0,2,0,0],
+  [0,2,2,0,0,0,0,2,0,0,0,2,0,0,0,0,2,0,0,2,0,0,2,0,0],
+  [0,0,2,0,0,0,2,2,2,0,0,2,2,2,0,0,2,0,0,0,0,0,2,0,0],
+  [0,2,2,2,0,0,2,0,0,2,2,2,2,2,2,2,2,0,0,2,2,0,2,0,0],
+  [0,2,2,3,0,0,2,0,0,1,2,2,2,2,0,0,0,0,2,2,2,2,2,0,0],
+  [0,2,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0],
+  [0,2,2,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0],
+  [0,2,0,2,2,2,0,0,0,0,0,2,2,2,2,0,0,0,0,0,2,2,2,0,0],
+  [0,2,0,2,2,2,0,0,0,0,0,2,0,0,2,0,0,0,0,0,2,2,2,0,0],
+  [0,2,0,0,0,2,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,2,0,0,0],
+  [0,2,0,0,0,2,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0,0],
+  [0,2,2,2,0,2,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0,0],
+  [0,2,0,2,0,0,0,0,0,0,0,2,0,0,2,2,0,0,2,0,0,2,0,0,0],
+  [0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,2,2,2,2,0,0,2,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+];
+
+var objCamara = function(x=0,y=0,tamX,tamY,posX,posY){
+    this.x = x;
+    this.y = y;
+
+    this.tamX = tamX;
+    this.tamY = tamY;
+
+    this.posX = posX;
+    this.posY = posY;
+
+    this.dibuja = function(){
+        for(y=this.y;y<(this.tamY + this.y);y++){
+            for(x=this.x;x<(this.tamX + this.x);x++){
+                var tile = escenario[y][x];
+                ctx.drawImage(tileMap,tile*32,0,32,32,anchoF*(x-this.x+this.posX),altoF*(y-this.y+this.posY),anchoF,altoF);
+            }
+        }
+    }
+
+    this.arriba = function(){
+        if(this.y > 0){
+            this.y--;
+        }
+      }
+    
+    this.abajo = function(){    
+        if(this.y < altoEscenario - this.tamY){
+            this.y++;
+        }
+    }
+    
+    this.derecha = function(){
+        if(this.x < anchoEscenario - this.tamX){
+            this.x++;
+        }
+    }
+    
+    this.izquierda = function(){
+        if(this.x > 0){
+            this.x--;
+        }
+    }
+} 
   
-function dibujaEscenario(){
-    for(y=0;y<10;y++){
-        for(x=0;x<15;x++){
+/* function dibujaEscenario(){
+    for(y=0;y<altoEscenario;y++){
+        for(x=0;x<anchoEscenario;x++){
+            //console.log('y',y,'x',x)
             var tile = escenario[y][x];
             ctx.drawImage(tileMap,tile*32,0,32,32,anchoF*x,altoF*y,anchoF,altoF);
         }
     }
-};
+}; */
 
 var antorcha = function(x,y){
     this.x = x;
@@ -62,9 +123,8 @@ var antorcha = function(x,y){
         }
     
         ctx.drawImage(tileMap,this.fotograma*32,64,32,32,anchoF*x,altoF*y,anchoF,altoF);
-    }
-  
-  }
+    }  
+}
 
 var malo = function(x,y){
     this.x = x;
@@ -226,6 +286,9 @@ function inicializa(){
     tileMap = new Image();
     tileMap.src = 'img/tilemap.png';
 
+    camara = new objCamara(2,2,5,5,1,1);
+    camara2 = new objCamara(3,4,4,6,8,2);
+
     protagonista = new jugador();
     
     imagenAntorcha = new antorcha(0,0);
@@ -236,16 +299,24 @@ function inicializa(){
 
     document.addEventListener('keydown', function(tecla){
         if(tecla.key === 'ArrowUp'){
-            protagonista.arriba();
+            //protagonista.arriba();
+            camara.arriba();
+            camara2.arriba();
         }
         if(tecla.key === 'ArrowDown'){
-            protagonista.abajo();
+            //protagonista.abajo();
+            camara.abajo();
+            camara2.abajo();
         }
         if(tecla.key === 'ArrowLeft'){
-            protagonista.izquierda();
+            //protagonista.izquierda();
+            camara.izquierda();
+            camara2.izquierda();
         }
         if(tecla.key === 'ArrowRight'){
-            protagonista.derecha();
+            //protagonista.derecha();
+            camara.derecha();
+            camara2.derecha();
         }
     });
 
@@ -261,12 +332,14 @@ function borraCanvas(){
 
 function principal(){
     borraCanvas();
-    dibujaEscenario();
-    imagenAntorcha.dibuja();
-    protagonista.dibuja();    
+    camara.dibuja();
+    camara2.dibuja();
+    //dibujaEscenario();
+    //imagenAntorcha.dibuja();
+    //protagonista.dibuja();    
 
     for(c=0; c<enemigo.length;c++){
-        enemigo[c].mueve();
-        enemigo[c].dibuja();
+        //enemigo[c].mueve();
+        //enemigo[c].dibuja();
     }
 }
